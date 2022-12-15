@@ -337,7 +337,6 @@ class ListField(Field):
         # split the value list into a set.
         value = str(value)
         value = set(value.split(','))
-        print(value)
 
         if operator == '!':
             return set([
