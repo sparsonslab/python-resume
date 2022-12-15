@@ -12,13 +12,15 @@ This code allows you to search a database with queries of the form,
 ```
 that are used in applications like [PubMed](https://pubmed.ncbi.nlm.nih.gov).
 
-The query is first parsed with code based on *Getting Started with PyParsing* (Paul McGuire, 2008, O'Reilly Media). The parsed query can then be converted into either a SQL query or used to search a document (JSON) database.
+The query is first parsed with code based on *Getting Started with PyParsing* (Paul McGuire, 2008, O'Reilly Media). The parsed query is then either:
+- translated into a query for a specific database type (e.g. SQL)
+- used to search a collection of *any* type of object (JSON documents, python dictionaries, hash-maps, instances of your-favourite class, etc.) using the `Field` class.
 
 Since writing this code over a wet weekend I have used it in multiple commercial projects. Pretty much all applications need some search functionality but using a parser of the type implemented here has several advantages:
 
 - The UI is very simple - just a query bar over a table of search results.
 - New fields (name, height, age, etc) can be added with a couple of lines of code. In my code specifically, by creating a new instance of `Field`.
-- Search can be extended to different types of database by simply adding one-line methods to the `UnaryOperation` and `BinaryOperation` classes.
+- Queries can be translated into other database formats (e.g. SQL) by simply adding one-line methods to the `UnaryOperation` and `BinaryOperation` classes.
 
 Contrast this with the "hand crafted" approach I have seen in many commercial projects.
 For each field there is separate UI element (often containing multiple subwidgets) and backend function, making for a very crowded and unaesthetic UI and codebase. Implementing boolean operations is hard and implementing S-expressions (bracketed boolean expressions) almost impossible, without a lot of very hacky code.
