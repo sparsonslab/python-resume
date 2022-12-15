@@ -4,7 +4,7 @@ These are samples of python code I have written for various projects over the la
 Some of the sample were written as part of a commercial project. In these cases, the code
 is fairly generic - it doesn't reveal anything about the project or infringe on any IP.
 
-## PubMed Parser
+## PubMed-like Database Queries
 
 This code allows you to search a database with queries of the form,
 ```  
