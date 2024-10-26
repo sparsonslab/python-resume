@@ -8,7 +8,7 @@ is fairly generic - it doesn't reveal anything about the project or infringe on 
 
 This code allows you to search a database with queries of the form,
 ```  
->20[age] and (Jam*[name] or Charles[name]) and (>1.5[height] and <1.6[height])
+>20[age] and (Jan*[name] or Charles[name]) and (>1.5[height] and <1.6[height])
 ```
 that are used in applications like [PubMed](https://pubmed.ncbi.nlm.nih.gov). The square brackets specify a field - a column in a SQL table, a key in a hash-map or JSON-document, an attribute in a class instance. The field name doesn't need to be the same as the column/key/attribute name. There simply has to be a mapping between them and this mapping can be many to one, to allow abbreviated field names. Before the field is a condition for that field. The condition-field pairs are combined with boolean algebra and brackets ("S-expressions").
 
