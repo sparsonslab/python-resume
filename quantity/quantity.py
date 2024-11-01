@@ -141,7 +141,7 @@ class Quantity:
         return self.convert_units(*other.units)
 
     def to_base_units(self) -> Quantity:
-        return Quantity(self.base_value, *[(0, u, p) for u, p in self.base_units.items()])
+        return Quantity(self.base_value, *self.tupled_base_units())
 
     def convert_units(self, *other_units) -> Quantity:
         """ Convert the quantity into other units.
@@ -311,7 +311,7 @@ class Quantity:
             raise TypeError(f"Cannot add {self} and {other}.")
 
         value = self.base_value + other.base_value
-        units = [(0, u, p) for u, p in self.base_units.items()]
+        units = self.tupled_base_units()
         return Quantity(value, *units)
 
     def __sub__(self, other: Quantity) -> Quantity:
@@ -320,7 +320,7 @@ class Quantity:
             raise TypeError(f"Cannot subtract {other} from {self}.")
 
         value = self.base_value - other.base_value
-        units = [(0, u, p) for u, p in self.base_units.items()]
+        units = self.tupled_base_units()
         return Quantity(value, *units)
 
     def __mul__(self, other: Quantity) -> Quantity:
@@ -362,7 +362,7 @@ class Quantity:
             value = np.exp(self.base_value)
         else:
             value = math.exp(self.value)
-        units = [(0, u, p) for u, p in self.base_units.items()]
+        units = self.tupled_base_units()
         return Quantity(value, *units)
 
     def log10(self) -> Quantity:
@@ -371,7 +371,7 @@ class Quantity:
             value = np.log10(self.base_value)
         else:
             value = math.log10(self.value)
-        units = [(0, u, p) for u, p in self.base_units.items()]
+        units = self.tupled_base_units()
         return Quantity(value, *units)
 
 
