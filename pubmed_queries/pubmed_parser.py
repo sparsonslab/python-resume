@@ -10,7 +10,7 @@ from pyparsing import (
     quotedString, removeQuotes,
 )
 
-from .field import Field, DateTimeField
+from field import Field, DateTimeField
 
 
 class PubMedParser:
