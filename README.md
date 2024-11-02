@@ -4,7 +4,7 @@ These are samples of python code I have written for various projects over the la
 Some of the sample were written as part of a commercial project. In these cases, the code
 is fairly generic - it doesn't reveal anything about the project or infringe on any IP.
 
-## PubMed-like Database Queries
+## PubMed Queries: Database search with parsed boolean expressions
 
 This code allows you to search a database with queries of the form,
 ```  
@@ -24,3 +24,14 @@ Since writing this code over a wet weekend I have used it in multiple commercial
 
 Contrast this with the "hand crafted" approach I have often seen in commercial projects.
 For each field there is a separate UI element (often containing multiple subwidgets) and backend function, making for a very crowded and unaesthetic UI and codebase. Implementing boolean operations is hard and implementing S-expressions almost impossible, without a lot of very hacky code.
+
+## Quantity: Dimensional analysis and equations of physical quantities
+
+Physical equations usually involve quantities with both a value and units. The units represent the variable's
+"dimension" in space, time and mass. Dimensional analysis involves making sure that the dimensions of quantities 
+in an equation are commensurate when combined. That is when two quantities are added, subtracted or equated 
+they have the same dimension. Also we often need to convert a quantity's value from one set of units to another.
+
+Dimensional analysis and unit conversion by-hand is often a pain, especially when variables are raised 
+by exponents and expressed in different, often non-base, units. To prevent headaches I wrote the `Quantity` class 
+to represent a value and its units.
