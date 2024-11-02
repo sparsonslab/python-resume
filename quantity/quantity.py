@@ -1,6 +1,7 @@
 from __future__ import annotations # To allow type hints on Quantity
 
 import math
+import numbers
 
 import numpy as np
 
@@ -96,7 +97,7 @@ class Quantity:
         if isinstance(unit, str):
             return 0, unit, 1
         # The unit and dimension
-        if types_match(unit, [str, int]):
+        if types_match(unit, [str, numbers.Real]):
             return 0, unit[0], unit[1]
         # The exponent and unit ...
         if types_match(unit, [int, str]):
@@ -104,9 +105,9 @@ class Quantity:
         if types_match(unit, [str, str]):
             return unit[0], unit[1], 1
         # Full specification ...
-        if types_match(unit, [int, str, int]):
+        if types_match(unit, [int, str, numbers.Real]):
             return unit
-        if types_match(unit, [str, str, int]):
+        if types_match(unit, [str, str, numbers.Real]):
             return unit
 
         raise ValueError(f"{unit} is not a correct unit argument.")
@@ -343,35 +344,36 @@ class Quantity:
         ]
         return Quantity(value, *units)
 
-    def __pow__(self, other: Quantity) -> Quantity:
+    def __pow__(self, z) -> Quantity:
         """ Raise to an exponent. """
-        if not isinstance(other, (int, float)):
-            raise TypeError("Exponent must be a number.")
+        if not isinstance(z, number.Real):
+            raise TypeError("Exponent must be a real number.")
 
-        value = self.base_value ** other
+        value = self.base_value ** z
         units = [
-            (0, u, p * other)
+            (0, u, p * z)
             for u, p in self.base_units.items()
-            if p * other != 0
+            if p * z != 0
         ]
         return Quantity(value, *units)
 
-    def exp(self) -> Quantity:
-        """ The exponential."""
-        if isinstance(self.value, np.ndarray):
-            value = np.exp(self.base_value)
-        else:
-            value = math.exp(self.value)
+    # -------------------------------------------------------------------------
+    # Exponents and logarithms
+    # -------------------------------------------------------------------------
+
+    def _apply_to_value(self, foo_scalar, foo_numpy) -> Quantity:
         units = self.tupled_base_units()
-        return Quantity(value, *units)
+        if isinstance(self.value, np.ndarray):
+            return Quantity(foo_numpy(self.base_value), *units)
+        return Quantity(foo_scalar(self.base_value), *units)
+
+    def exp(self) -> Quantity:
+        return self._apply_to_value(math.exp, np.exp)
+
+    def ln(self):
+        return self._apply_to_value(math.log, np.log)
 
     def log10(self) -> Quantity:
-        """ The base 10 logarithm. """
-        if isinstance(self.value, np.ndarray):
-            value = np.log10(self.base_value)
-        else:
-            value = math.log10(self.value)
-        units = self.tupled_base_units()
-        return Quantity(value, *units)
+        return self._apply_to_value(math.log10, np.log10)
 
 
