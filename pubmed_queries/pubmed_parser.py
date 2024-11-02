@@ -42,13 +42,11 @@ class PubMedParser:
         self.fields = fields
 
         # search field
-        field = Literal("[").suppress() - Word(alphas) - Literal(
-            "]").suppress()
+        field = Literal("[").suppress() - Word(alphas) - Literal("]").suppress()
 
         # string search expression
         # ::= <search_term>[<field name>]
-        str_srch = Group((Word(alphanums + '*') | quotedString.setParseAction(
-            removeQuotes)) - field)
+        str_srch = Group((Word(alphanums + '*') | quotedString.setParseAction(removeQuotes)) - field)
         str_srch.setParseAction(SearchString)
 
         # number (including date/time) search expression
