@@ -182,48 +182,34 @@ class Quantity:
     # Printing
     # -------------------------------------------------------------------------
 
-    def _formatted_units(self) -> str:
-        """ String of the quantity's units.
+    def to_string(self, latex=False) -> str:
 
-        Yields
-        ------
-        str:
-            A formatted string representation of each unit.
-        """
-        for n, u, p in self.units:
-            if isinstance(n, str):
-                yield "{}{}^{}".format(n, u, p)
-            elif n == 0:
-                yield "{}^{}".format(u, p)
+        def format_unit(unit) -> str:
+            """ String of a unit tuple."""
+            n, u, p = unit
+            y = "^{" if latex else "^"
+            z = "}" if latex else ""
+
+            if isinstance(n, int):
+                s = u if n == 0 else f"(10{y}{n}{z}.{u})"
             else:
-                yield "(10^{}.{})^{}".format(n, u, p)
+                s = f"{n}{u}"
+            if p != 1:
+                try:
+                    s += f"{y}{int(p)}{z}"
+                except ValueError:
+                    s += f"{y}{p}{z}"
+            return s
 
-    def _latex_formatted_units(self) -> str:
-        """ String of the quantity's units, formatted for Latex. """
-        for n, u, p in self.units:
-
-            if isinstance(n, str):
-                prefix = "{}{}".format(n, u)
-            elif n == 0:
-                prefix = u
-            else:
-                prefix = "(10^{{{}}}{})".format(n, u)
-
-            if p == 0:
-                yield ""
-            elif p == 1:
-                yield prefix
-            else:
-                yield "{}^{{{}}}".format(prefix, p)
-
-    def formatted_units(self, latex=False) -> str:
+        unit_str = ".".join([format_unit(unit) for unit in self.units])
+        blank = "\:" if latex else " "
+        full_str = str(self.value) + blank + unit_str
         if latex:
-            fs = ".".join([s for s in self._latex_formatted_units()])
-            return r"$" + fs + r"$"
-        return ".".join([s for s in self._formatted_units()])
+            return r"$" + full_str + r"$"
+        return full_str
 
     def __str__(self):
-        return "{} ".format(self.value) + self.formatted_units()
+        return self.to_string()
 
     def __repr__(self):
         return str(self)
