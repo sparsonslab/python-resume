@@ -88,7 +88,8 @@ class Quantity:
         self.multiplier, self.base_units = Quantity.base_units(*self.units)
 
     def _normalize_unit(self, unit):
-        """ Normalise a unit argument into (exponent, name, dimension) tuple. """
+        """ Normalise a unit argument into (exponent, name, dimension) tuple.
+        """
         def types_match(values, types):
             if len(values) != len(types):
                 return False
@@ -183,7 +184,18 @@ class Quantity:
     # -------------------------------------------------------------------------
 
     def to_string(self, latex=False) -> str:
+        """ Convert te quantity to a string for display.
 
+        Parameters
+        ----------
+        latex: bool
+            Convert to a LaTeX string.
+
+        Return
+        ------
+        str:
+            The quantity.
+        """
         def format_unit(unit) -> str:
             """ String of a unit tuple."""
             n, u, p = unit
@@ -358,23 +370,6 @@ class Quantity:
         ]
         return Quantity(value, *units)
 
-    # -------------------------------------------------------------------------
-    # Exponents and logarithms
-    # -------------------------------------------------------------------------
-
-    def _apply_to_value(self, foo_scalar, foo_numpy) -> Quantity:
-        units = self.tupled_base_units()
-        if isinstance(self.value, np.ndarray):
-            return Quantity(foo_numpy(self.base_value), *units)
-        return Quantity(foo_scalar(self.base_value), *units)
-
-    def exp(self) -> Quantity:
-        return self._apply_to_value(math.exp, np.exp)
-
-    def ln(self):
-        return self._apply_to_value(math.log, np.log)
-
-    def log10(self) -> Quantity:
-        return self._apply_to_value(math.log10, np.log10)
-
-
+    def apply(self, foo) -> Quantity:
+        """ Apply a function to the value. """
+        return Quantity(foo(self.value), *self.units)
