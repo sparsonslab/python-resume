@@ -15,7 +15,7 @@ class Quantity:
     In general, a unit can be represented as,
     (10^n x u)^p
     where,
-    n: number | str
+    n: int | str
         The unit's prefix (exponent or equivalent milli/micro, etc).
         see Quantity.UNIT_PREFIXS.
     u: str
@@ -93,13 +93,28 @@ class Quantity:
             if len(values) != len(types):
                 return False
             return all([isinstance(v, t) for v, t in zip(values, types)])
-        # Just the unit
+
+        def try_number(value):
+            try:
+                return int(value)
+            except ValueError:
+                pass
+            try:
+                return float(value)
+            except ValueError:
+                pass
+            return value
+
+        # Just the unit name or a period-delimited unit.
         if isinstance(unit, str):
+            if "," in unit:
+                split_unit = [try_number(p) for p in unit.split(",")]
+                return self._normalize_unit(tuple(split_unit))
             return 0, unit, 1
-        # The unit and dimension
+        # The name and dimension
         if types_match(unit, [str, numbers.Real]):
             return 0, unit[0], unit[1]
-        # The exponent and unit ...
+        # The exponent and name ...
         if types_match(unit, [int, str]):
             return unit[0], unit[1], 1
         if types_match(unit, [str, str]):
@@ -260,7 +275,7 @@ class Quantity:
                 if n in Quantity.UNIT_PREFIXS:
                     n = Quantity.UNIT_PREFIXS[n]
                 else:
-                    continue
+                    raise KeyError(f"{n} is not a recognised unit prefix.")
 
             # Derived unit.
             #    (10^n u)^p
@@ -346,7 +361,7 @@ class Quantity:
 
     def __pow__(self, z) -> Quantity:
         """ Raise to an exponent. """
-        if not isinstance(z, number.Real):
+        if not isinstance(z, numbers.Real):
             raise TypeError("Exponent must be a real number.")
 
         value = self.base_value ** z
