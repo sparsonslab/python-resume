@@ -1,5 +1,4 @@
-""" Parsing of boolean S-expressions.
-"""
+
 from functools import reduce
 from itertools import chain
 
