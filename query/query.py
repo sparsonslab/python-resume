@@ -1,3 +1,10 @@
+#  (C) Copyright 2017-2024 Sean Parsons, Cambridge, UK.
+#               All rights reserved.
+#  Permission to use, copy, modify, and distribute this software and its
+#  documentation for any purpose and without fee is hereby granted, provided
+#  that the above copyright notice appear in all copies and that both that
+#  copyright notice and this permission notice appear in supporting
+#  documentation.
 from abc import ABCMeta, abstractmethod
 
 from pyparsing import (
@@ -8,49 +15,142 @@ from pyparsing import (
 )
 
 
-class DataBase(metaclass=ABCMeta):
-    """ An searchable database.
+class Query(metaclass=ABCMeta):
+    """ An interface for querying databases using boolean expressions.
 
+    This class provides a uniform interface for querying any type of database,
+    using the same query syntax. A concrete subclass for a particular
+    database must override the abstract methods and (possibly) self.query().
+
+    Boolean queries consist of "<comparator><search-term>[<field>]" inputs
+    combined using boolean operators (AND, OR and NOT) and parentheses.
+    e.g. To query a database of animals that begin with "z" or are green and
+    have more than two legs, the query is,
+    "(z*[name] OR green[color]) AND >2[legs]"
+
+    Based upon the code of,
+    McGuire (2007). Getting started with Pyparsing. O'Reilly.
+
+    Attributes
+    ----------
+    grammar: pyparsing.Forward
+        The grammar that defines the query syntax.
     """
     def __init__(self):
         self.grammar = self._create_grammar()
 
-    def query(self, query, *args, **kwargs):
-        """ Make a query. """
+    def query(self, query):
+        """ Make a query.
+
+        Parameters
+        ----------
+        query: str
+            A boolean query.
+
+        Returns
+        -------
+        any:
+            The search result. The type is that returned by the overridden
+            abstract methods.
+        """
         try:
             parse_result = self.grammar.parseString(query)
-            return parse_result[0].evaluate(*args, **kwargs)
+            return parse_result[0].evaluate()
         except ParseSyntaxException:
             raise ValueError('The query cannot be parsed.')
         except ParseException:
             raise ValueError('The query cannot be parsed.')
 
     # -------------------------------------------------------------------------
-    # Database specific search actions.
+    # Operand evaluation methods.
     # -------------------------------------------------------------------------
 
     @abstractmethod
-    def search_not(self, operands):
+    def search_not(self, operand):
+        """ Not operation.
+
+        Parameters
+        ----------
+        operand:
+            The operand to be combined with NOT.
+            An instance of one of the operand classes defined inline
+            in self._create_grammar(). e.g. SearchAnd, SearchString, etc.
+        """
         pass
 
     @abstractmethod
     def search_and(self, operands):
+        """ And operation.
+
+        Parameters
+        ----------
+        operands:
+            The operands to be combined with AND.
+            Instances of one of the operand classes defined inline
+            in self._create_grammar(). e.g. SearchNumber, SearchString, etc.
+        """
         pass
 
     @abstractmethod
     def search_or(self, operands):
+        """ Or operation.
+
+        Parameters
+        ----------
+        operands:
+            The operands to be combined with OR.
+            Instances of one of the operand classes defined inline
+            in self._create_grammar(). e.g. SearchNumber, SearchString, etc.
+        """
         pass
 
     @abstractmethod
     def search_string(self, term, field):
+        """ Search string operation.
+
+        <search-term>[field]
+
+        Parameters
+        ----------
+        term: str
+            The search term. Can contain alphanumerics and '*'.
+        field: str
+            The field name.
+        """
         pass
 
     @abstractmethod
     def search_number(self, comp, term, field):
+        """ Search string operation.
+
+        <comparator><search-term>[field]
+
+        Parameters
+        ----------
+        comp: str
+            The comparator. Must be <, > or =.
+        term: str
+            The search term. Can contain alphanumerics and ':', '.' and '-'.
+        field: str
+            The field name.
+        """
         pass
 
     @abstractmethod
     def search_list(self, comp, term, field):
+        """ Search string operation.
+
+        <comparator><search-term>[field]
+
+        Parameters
+        ----------
+        comp: str
+            The comparator. Must be ! or ?.
+        term: str
+            The search term. Can contain alphanumerics and ',' (to delimit a list).
+        field: str
+            The field name.
+        """
         pass
 
     # -------------------------------------------------------------------------
@@ -61,7 +161,9 @@ class DataBase(metaclass=ABCMeta):
         """ Create the grammar for searching the database. """
         parent = self
 
-        # Grammar objects
+        # Operator classes.
+        # These are defined inline so that they can access the overridden
+        # abstract methods.
         class UnaryOperation:
             def __init__(self, tokens):
                 self.op, self.oper = tokens[0]
