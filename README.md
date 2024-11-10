@@ -29,7 +29,7 @@ a text box and drop-down comparator for each numeric field. The fields can only 
 (all OR or all AND) or else there has to be a bunch more UI elements for selecting AND, OR, NOT. Boolean expression can 
 certainly not be combined in parentheses.
 
-Implementing a simple PubMed-style query, requires a parser to parse the query. I came across the Pyparsing package 
+Implementing a simple PubMed-style query, requires a parser to parse the query. I came across the [Pyparsing package](https://pyparsing-docs.readthedocs.io/en/latest/index.html)  
 which was included in some other package I was using (I can't remember which) and from there the booklet, "Getting 
 started with Pyparsing" by Paul McGuire (2007, O'Reilly). A section of that book ("Parsing a search string") essentially 
 gave me the code I was looking for. Perfect!
