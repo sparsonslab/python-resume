@@ -4,26 +4,30 @@ These are samples of python code I have written for various projects over the la
 Some of the sample were written as part of a commercial project. In these cases, the code
 is fairly generic - it doesn't reveal anything about the project or infringe on any IP.
 
-## PubMed Queries: Database search with parsed boolean expressions
+## Query: Database Querying with a Uniform Syntax
 
-This code allows you to search a database with queries of the form,
-```  
->20[age] and (Jan*[name] or Charles[name]) and (>1.5[height] and <1.6[height])
-```
-that are used in applications like [PubMed](https://pubmed.ncbi.nlm.nih.gov). The square brackets specify a field - a column in a SQL table, a key in a hash-map or JSON-document, an attribute in a class instance. The field name doesn't need to be the same as the column/key/attribute name. There simply has to be a mapping between them and this mapping can be many to one, to allow abbreviated field names. Before the field is a condition for that field. The condition-field pairs are combined with boolean algebra and brackets ("S-expressions").
+In my academic days, before Google Scholar came along, I was a big user of [PubMed](https://pubmed.ncbi.nlm.nih.gov/) 
+for searching through the scientific literature. I became very familiar with PubMed's query syntax - things of the sort:
 
-The query is first parsed with code based on *Getting Started with PyParsing* (Paul McGuire, 2008, O'Reilly Media). The parsed query is then either:
-- translated into a query for a specific database type (e.g. SQL)
-- used to search a collection of *any* type of object (JSON documents, python dictionaries, hash-maps, instances of your-favourite class, etc.) using the `Field` class.
+``` parsons sp[au] and (intestine[title] or channel[title]) ```
 
-Since writing this code over a wet weekend I have used it in multiple commercial projects. Pretty much all applications need some search functionality. Using a parser of the type implemented here has several advantages:
+When I was writing a search engine at my first industry job, I thought this would make a great interface. The UI would 
+only need a single text box for inputting the query. I had seen too many times in UIs the following pattern. Each field 
+is queried with a separate UI element(s), e.g. a text box for each string field, a check box for each boolean field, 
+a text box and drop-down comparator for each numeric field. The fields can only be combined in limited ways 
+(all OR or all AND) or else there has to be a bunch more UI elements for selecting AND, OR, NOT. Boolean expression can 
+certainly not be combined in parentheses.
 
-- The UI is very simple - just a query bar over a table of search results.
-- New fields (name, height, age, etc) can be added with a couple of lines of code. In my code specifically, by creating a new instance of `Field`.
-- Queries can be translated into other database formats (e.g. SQL) by simply adding one-line methods to the `UnaryOperation` and `BinaryOperation` classes.
+Implementing a simple PubMed-style query, requires a parser to parse the query. I came across the Pyparsing package 
+which was included in some other package I was using (I can't remember which) and from there the booklet, "Getting 
+started with Pyparsing" by Paul McGuire (2007, O'Reilly). A section of that book ("Parsing a search string") essentially 
+gave me the code I was looking for. Perfect!
 
-Contrast this with the "hand crafted" approach I have often seen in commercial projects.
-For each field there is a separate UI element (often containing multiple subwidgets) and backend function, making for a very crowded and unaesthetic UI and codebase. Implementing boolean operations is hard and implementing S-expressions almost impossible, without a lot of very hacky code.
+In this repository I have written an class (`Query`) that does the parsing outlined in McGuire. This is a base 
+(abtract) class. It can be inherited from to implement the same PubMed-like query interface for different kinds 
+of database. `ObjectListQuery(Query)` is used to query a list of objects of any type (class objects, 
+dictionaries, etc.). `SQLQuery(Query)` is used to generate SQL queries. You can write your own subclass!
+
 
 ## Quantity: Dimensional analysis and equations of physical quantities
 
