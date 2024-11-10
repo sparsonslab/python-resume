@@ -4,6 +4,17 @@ These are samples of python code I have written for various projects over the la
 Some of the sample were written as part of a commercial project. In these cases, the code
 is fairly generic - it doesn't reveal anything about the project or infringe on any IP.
 
+## Quantity: Dimensional analysis and equations of physical quantities
+
+Physical equations usually involve quantities with both a value and units. The units represent the variable's
+"dimension" in space, time and mass. Dimensional analysis involves making sure that the dimensions of quantities 
+in an equation are commensurate when combined. That is when two quantities are added, subtracted or equated 
+they have the same dimension. Also we often need to convert a quantity's value from one set of units to another.
+
+Dimensional analysis and unit conversion by-hand is often a pain, especially when variables are raised 
+by exponents and expressed in different, often non-base, units. To prevent headaches I wrote the `Quantity` class 
+to represent a value and its units.
+
 ## Query: Database querying with a simple and uniform syntax
 
 In my academic days, before Google Scholar came along, I was a big user of [PubMed](https://pubmed.ncbi.nlm.nih.gov/) 
@@ -27,15 +38,3 @@ In this repository I have written an class (`Query`) that does the parsing outli
 (abtract) class. It can be inherited from to implement the same PubMed-like query interface for different kinds 
 of database. `ObjectListQuery(Query)` is used to query a list of objects of any type (class objects, 
 dictionaries, etc.). `SQLQuery(Query)` is used to generate SQL queries. You can write your own subclass!
-
-
-## Quantity: Dimensional analysis and equations of physical quantities
-
-Physical equations usually involve quantities with both a value and units. The units represent the variable's
-"dimension" in space, time and mass. Dimensional analysis involves making sure that the dimensions of quantities 
-in an equation are commensurate when combined. That is when two quantities are added, subtracted or equated 
-they have the same dimension. Also we often need to convert a quantity's value from one set of units to another.
-
-Dimensional analysis and unit conversion by-hand is often a pain, especially when variables are raised 
-by exponents and expressed in different, often non-base, units. To prevent headaches I wrote the `Quantity` class 
-to represent a value and its units.
