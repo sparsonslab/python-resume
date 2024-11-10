@@ -4,7 +4,7 @@ These are samples of python code I have written for various projects over the la
 Some of the sample were written as part of a commercial project. In these cases, the code
 is fairly generic - it doesn't reveal anything about the project or infringe on any IP.
 
-## Query: Database Querying with a Uniform Syntax
+## Query: Database querying with a simple and uniform syntax
 
 In my academic days, before Google Scholar came along, I was a big user of [PubMed](https://pubmed.ncbi.nlm.nih.gov/) 
 for searching through the scientific literature. I became very familiar with PubMed's query syntax - things of the sort:
