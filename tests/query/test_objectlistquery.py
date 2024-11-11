@@ -52,7 +52,51 @@ class TestObjectListQuery(unittest.TestCase):
             ("arms", "ar", int): (lambda x: x["appendages"]["arms"]),
             ("flys", "fy", bool): (lambda x: x["abilities"]["flys"]),
         })
+        self.querier.add_objects(objects)
 
-    def test_working_querys(self):
+    def test_non_existent_field(self):
+        # Given: Fields that don't exist.
+        non_existent_fields = ["eggs", "torsion", "energy"]
 
-        self.assertEqual(3, 3)
+        # When: The fields are queried.
+        for field in non_existent_fields:
+            query = f">4[{field}] and zebra[name]"
+
+            # Then: An error is raised.
+            msg = f"Field {field} not recognised"
+            with self.subTest(field), self.assertRaisesRegex(ValueError, msg):
+                self.querier.query(query)
+
+    def test_incorrect_search_term(self):
+        # Given: Fields with incorrect search terms for the field type.
+        fields_and_search_terms = [
+            ("name", ">5"),
+            ("caught", "sometime"),
+            ("height", "bl*"),
+            ("flys", "=9"),
+        ]
+
+        # When: The fields are queried with the incorrect terms.
+        for field, search_term in fields_and_search_terms:
+            query = f"{search_term}[{field}]"
+
+            # Then: An error is thrown saying that the field is not a [correct type]
+            msg = f"Field {field} is not a"
+            with self.subTest(field), self.assertRaisesRegex(ValueError, msg):
+                self.querier.query(query)
+
+    def test_conversion(self):
+
+        fields_and_search_terms = [
+            ("caught", ">", "2020-14-99"),
+        ]
+
+        # When: The fields are queried with the incorrect terms.
+        for field, comp, term in fields_and_search_terms:
+            query = f"{comp}{term}[{field}]"
+            print(query)
+
+            # Then: An error is thrown saying that the field is not a [correct type]
+            msg = f"Field {field}: {term} cannot be converted into a"
+            with self.subTest(field), self.assertRaisesRegex(ValueError, msg):
+                self.querier.query(query)
