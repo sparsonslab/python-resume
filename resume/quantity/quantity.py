@@ -1,9 +1,7 @@
 from __future__ import annotations # To allow type hints on Quantity
 
-import math
-import numbers
 
-import numpy as np
+import numbers
 
 
 class Quantity:

@@ -8,10 +8,9 @@
 import datetime
 import fnmatch
 from functools import reduce
-from itertools import chain
 import uuid
 
-from query import Query
+from resume.query.query import Query
 
 
 class ObjectListQuery(Query):
