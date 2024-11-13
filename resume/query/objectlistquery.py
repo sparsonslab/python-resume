@@ -8,6 +8,7 @@
 import datetime
 import fnmatch
 from functools import reduce
+import operator
 import uuid
 
 from resume.query.query import Query
@@ -38,6 +39,8 @@ class ObjectListQuery(Query):
     universal_set: set(str)
         The unique identifiers of all the database entries.
     """
+    comparator_map = {">": operator.gt, "<": operator.lt, "=": operator.eq}
+
     def __init__(self, fields):
         super().__init__()
         self.fields = {
@@ -48,22 +51,23 @@ class ObjectListQuery(Query):
         self.indexes = {k: {} for k in self.fields.keys()}
         self.universal_set = set()
 
-    def add_objects(self, objects):
+    def add_objects(self, objects, identifier_foo=None):
         """ Add to the data to be searched.
 
         Parameters
         ----------
         objects: [object]
             The objects that make up the database.
+        identifier_foo: Callable or None
+            A function that returns the unique identifier of an object.
         """
-        for object in objects:
-            # todo - allow the objects to already be indexed or include an index field.
-            idx = uuid.uuid4()
+        for obj in objects:
+            idx = uuid.uuid4() if identifier_foo is None else identifier_foo(obj)
             self.universal_set.add(idx)
-            self.data[idx] = object
+            self.data[idx] = obj
             for k, foo in self.fields.items():
                 try:
-                    value = foo(object)
+                    value = foo(obj)
                     if isinstance(value, k[2]):  # type check
                         self.indexes[k][idx] = value
                 except Exception:
@@ -151,6 +155,7 @@ class ObjectListQuery(Query):
                     (f"Field {field}: {term} cannot be converted into a number.")
         elif k[2] == datetime.datetime:
             try:
+                # todo - allow different datetime formats?
                 qterm = datetime.datetime.strptime(term, "%Y-%m-%d")
             except ValueError:
                 raise ValueError \
@@ -160,14 +165,12 @@ class ObjectListQuery(Query):
                 (f"Field {field} is not a float or integer or datetime.")
 
         # Make comparison.
-        if comp == "=":
-            return(set([idx for idx, entry in self.indexes[k].items() if entry == qterm]))
-        if comp == ">":
-            return(set([idx for idx, entry in self.indexes[k].items() if entry > qterm]))
-        if comp == "<":
-            return(set([idx for idx, entry in self.indexes[k].items() if entry < qterm]))
-
-        raise ValueError(f"Field {field}: {comp} is not a valid comparator.")
+        if comp not in self.comparator_map:
+            raise ValueError(f"Field {field}: {comp} is not a valid comparator.")
+        return set([
+            idx for idx, entry in self.indexes[k].items()
+            if self.comparator_map[comp](entry, qterm)
+        ])
 
     def search_list(self, comp, term, field):
         return set()

@@ -85,18 +85,20 @@ class TestObjectListQuery(unittest.TestCase):
             with self.subTest(field), self.assertRaisesRegex(ValueError, msg):
                 self.querier.query(query)
 
-    def test_conversion(self):
+    def test_term_cannot_be_converted(self):
 
+        # Given: search terms that cannot be converted into the field's type.
         fields_and_search_terms = [
             ("caught", ">", "2020-14-99"),
+            ("height", ">", "76.8.9")
         ]
 
-        # When: The fields are queried with the incorrect terms.
+        # When: The fields are queried with the incovertable terms.
         for field, comp, term in fields_and_search_terms:
             query = f"{comp}{term}[{field}]"
-            print(query)
 
-            # Then: An error is thrown saying that the field is not a [correct type]
+            # Then: An error is thrown saying that the field cannot be converted.
             msg = f"Field {field}: {term} cannot be converted into a"
             with self.subTest(field), self.assertRaisesRegex(ValueError, msg):
                 self.querier.query(query)
+
