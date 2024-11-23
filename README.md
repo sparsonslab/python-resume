@@ -40,3 +40,10 @@ abstract base class. It can be inherited from to implement the same PubMed-like 
 database. [`ObjectListQuery(Query)`](resume/query/objectlistquery.py) is used to query a list of objects of any type (class objects, dictionaries, etc.). 
 Fields are added simply, with a one-line specification. [`SQLQuery(Query)`](resume/query/sqlquery.py) is used to generate SQL queries. You can 
 write your own subclass!
+
+----
+(C) Copyright 2017-2024 Sean Parsons, Cambridge, UK.
+All rights reserved.
+Permission to use, copy, modify, and distribute this software and its documentation for any purpose and without fee 
+is hereby granted, provided that the above copyright notice appear in all copies and that both that copyright notice 
+and this permission notice appear in supporting documentation.
