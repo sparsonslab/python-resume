@@ -112,12 +112,10 @@ class ObjectListQuery(Query):
         return self.universal_set - operand.evaluate()
 
     def search_and(self, operands):
-        return reduce(lambda x, y: x & y,
-                      [oper.evaluate() for oper in operands])
+        return reduce(lambda x, y: x & y, [oper.evaluate() for oper in operands])
 
     def search_or(self, operands):
-        return reduce(lambda x, y: x | y,
-                      [oper.evaluate() for oper in operands])
+        return reduce(lambda x, y: x | y, [oper.evaluate() for oper in operands])
 
     def search_string(self, term, field):
         """ String search operation.
