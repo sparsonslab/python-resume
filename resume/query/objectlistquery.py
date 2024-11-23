@@ -9,6 +9,7 @@ import datetime
 import fnmatch
 from functools import reduce
 import operator
+import re
 
 from resume.query.query import Query
 
@@ -111,10 +112,12 @@ class ObjectListQuery(Query):
         return self.universal_set - operand.evaluate()
 
     def search_and(self, operands):
-        return reduce(lambda x, y: x & y, [oper.evaluate() for oper in operands])
+        return reduce(lambda x, y: x & y,
+                      [oper.evaluate() for oper in operands])
 
     def search_or(self, operands):
-        return reduce(lambda x, y: x | y, [oper.evaluate() for oper in operands])
+        return reduce(lambda x, y: x | y,
+                      [oper.evaluate() for oper in operands])
 
     def search_string(self, term, field):
         """ String search operation.
@@ -126,10 +129,12 @@ class ObjectListQuery(Query):
 
         # String field
         if k[2] == str:
-            qterm = str(term)
+            # Use an re.Pattern object for matching. This is twice as fast
+            # as using fnmatch.fnmatch(entry, qterm).
+            reobj = re.compile(fnmatch.translate(str(term)))
             return set([
                 idx for idx, entry in self.indexes[k].items()
-                if fnmatch.fnmatch(entry, qterm)
+                if reobj.search(entry) is not None
             ])
 
         # Boolean field.
@@ -166,10 +171,13 @@ class ObjectListQuery(Query):
 
         # Make comparison.
         if comp not in self.comparator_map:
-            raise ValueError(f"Field {field}: {comp} is not a valid comparator.")
+            raise ValueError(
+                f"Field {field}: {comp} is not a valid comparator.")
+
+        comp_foo = self.comparator_map[comp]
         return set([
             idx for idx, entry in self.indexes[k].items()
-            if self.comparator_map[comp](entry, qterm)
+            if comp_foo(entry, qterm)
         ])
 
     def search_list(self, comp, term, field):
