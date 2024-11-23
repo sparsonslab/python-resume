@@ -9,7 +9,6 @@ import datetime
 import fnmatch
 from functools import reduce
 import operator
-import uuid
 
 from resume.query.query import Query
 
@@ -33,7 +32,7 @@ class ObjectListQuery(Query):
         The database to be searched.
         <unique identifier> : object in database.
     indexes: {(str, str, type): {str: any, ...}, ...}
-        The indexed field values of the database.
+        Covering indexes for each field.
         (<full field name>, <abbreviated field name>, <field type>):
         {<unique identifier>: field value, ...}
     universal_set: set(str)
@@ -61,8 +60,9 @@ class ObjectListQuery(Query):
         identifier_foo: Callable or None
             A function that returns the unique identifier of an object.
         """
-        for obj in objects:
-            idx = uuid.uuid4() if identifier_foo is None else identifier_foo(obj)
+        i = len(self.universal_set)
+        for j, obj in enumerate(objects):
+            idx = i + j if identifier_foo is None else identifier_foo(obj)
             self.universal_set.add(idx)
             self.data[idx] = obj
             for k, foo in self.fields.items():
