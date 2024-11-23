@@ -6,7 +6,7 @@
 #  copyright notice and this permission notice appear in supporting
 #  documentation.
 
-from query import Query
+from resume.query.query import Query
 
 
 class SQLQuery(Query):
