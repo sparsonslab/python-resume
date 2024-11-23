@@ -42,6 +42,16 @@ class TestObjectListQuery(unittest.TestCase):
                 "dimensions": {"height": 0.005, "length": 0.04},
                 "appendages": {"legs": 1000}
             },
+            {
+                "name": "lobster", "caught": datetime.datetime(1978, 6, 8),
+                "dimensions": {"height": 0.1, "length": 0.4},
+                "appendages": {"legs": 6, "arms": 2}
+            },
+            {
+                "name": "spider", "caught": datetime.datetime(1988, 7, 1),
+                "dimensions": {"height": 0.005, "length": 0.02},
+                "appendages": {"legs": 8}
+            },
         ]
 
         self.querier = ObjectListQuery(fields={
@@ -53,6 +63,25 @@ class TestObjectListQuery(unittest.TestCase):
             ("flys", "fy", bool): (lambda x: x["abilities"]["flys"]),
         })
         self.querier.add_objects(objects)
+
+    def test_correct_search(self):
+        # Given: Queries and the expected results.
+        query_results = {
+            ">7[legs]": ["millipede", "spider"],
+            ">7[legs] or *er[nm]": ["millipede", "spider", "lobster"],
+            "=2[lg] and >1[height]": ["monkey", "whale"],
+            ">2[legs] and (*er[nm] or >1990-01-01[cg])": ["lobster", "spider", "zebra"],
+            "<7[legs] and *er[nm]": ["lobster"]
+        }
+
+        for query, expected_result in query_results.items():
+            with self.subTest(query):
+                # When: The query is made.
+                actual_result = set([
+                    obj["name"] for obj in self.querier.query(query)
+                ])
+                # Then: The returned objects match those expected.
+                self.assertEqual(set(expected_result), actual_result)
 
     def test_non_existent_field(self):
         # Given: Fields that don't exist.
@@ -101,6 +130,3 @@ class TestObjectListQuery(unittest.TestCase):
             msg = f"Field {field}: {term} cannot be converted into a"
             with self.subTest(field), self.assertRaisesRegex(ValueError, msg):
                 self.querier.query(query)
-
-
-
