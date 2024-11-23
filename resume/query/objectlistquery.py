@@ -129,12 +129,12 @@ class ObjectListQuery(Query):
 
         # String field
         if k[2] == str:
-            # Use an re.Pattern object for matching. This is twice as fast
+            # Use an re.Pattern object for matching. This is > twice as fast
             # as using fnmatch.fnmatch(entry, qterm).
-            reobj = re.compile(fnmatch.translate(str(term)))
+            qterm_pattern = re.compile(fnmatch.translate(str(term)))
             return set([
                 idx for idx, entry in self.indexes[k].items()
-                if reobj.search(entry) is not None
+                if qterm_pattern.search(entry) is not None
             ])
 
         # Boolean field.
