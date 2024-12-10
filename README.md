@@ -37,9 +37,10 @@ I was using (I can't remember which) and from there the booklet, "Getting  start
 
 In this repository I have written an class ([`Query`](resume/query/query.py)) that does the parsing outlined in McGuire. This is an 
 abstract base class. It can be inherited from to implement the same PubMed-like query interface for different kinds of 
-database. [`ObjectListQuery(Query)`](resume/query/objectlistquery.py) is used to query a list of objects of any type (class objects, dictionaries, etc.). 
+database.  [`ObjectListQuery(Query)`](resume/query/objectlistquery.py) is used to query a list of objects of any type (class objects, dictionaries, etc.). 
 Fields are added simply, with a one-line specification. [`SQLQuery(Query)`](resume/query/sqlquery.py) is used to generate SQL queries. You can 
-write your own subclass!
+write your own subclass! `Query` is a  [data access object](https://en.wikipedia.org/wiki/Data_access_object) (DAO) - it provides access to a database
+abstracted from the details of any particular database type.
 
 ----
 (C) Copyright 2017-2024 Sean Parsons, Cambridge, UK.
