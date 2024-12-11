@@ -36,11 +36,15 @@ I was using (I can't remember which) and from there the booklet, "Getting  start
 (2007, O'Reilly). A section of that book ("Parsing a search string") essentially gave me the code I was looking for. Perfect!
 
 In this repository I have written an class ([`Query`](resume/query/query.py)) that does the parsing outlined in McGuire. This is an 
-abstract base class. It can be inherited from to implement the same PubMed-like query interface for different kinds of 
-database.  [`ObjectListQuery(Query)`](resume/query/objectlistquery.py) is used to query a list of objects of any type (class objects, dictionaries, etc.). 
-Fields are added simply, with a one-line specification. [`SQLQuery(Query)`](resume/query/sqlquery.py) is used to generate SQL queries. You can 
-write your own subclass! `Query` is a  [data access object](https://en.wikipedia.org/wiki/Data_access_object) (DAO) - it provides access to a database
-abstracted from the details of any particular database type.
+abstract base class. `Query` is a  [data access object](https://en.wikipedia.org/wiki/Data_access_object) (DAO) - it provides access to a database
+abstracted from the details of any particular database type. It can be inherited from to implement the same PubMed-like query interface for different kinds of 
+database:
+- [`ObjectListQuery(Query)`](resume/query/objectlistquery.py) is used to query a list of objects of any type (class objects, dictionaries, etc.). 
+Fields are added simply, with a one-line specification. 
+- [`SQLQuery(Query)`](resume/query/sqlquery.py) is used to generate SQL queries.
+- [`MongoQuery(Query)`](resume/query/mongoquery.py) is used to generate MongoDB queries for PyMongo.
+  
+You can write your own subclass!
 
 ----
 (C) Copyright 2017-2024 Sean Parsons, Cambridge, UK.
