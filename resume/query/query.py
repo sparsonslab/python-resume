@@ -6,6 +6,7 @@
 #  copyright notice and this permission notice appear in supporting
 #  documentation.
 from abc import ABCMeta, abstractmethod
+import datetime
 
 from pyparsing import (
     alphas, alphanums, nums, CaselessLiteral, Group, Literal, Word,
@@ -246,3 +247,54 @@ class Query(metaclass=ABCMeta):
              (and_, 2, opAssoc.LEFT, SearchAnd),
              (or_, 2, opAssoc.LEFT, SearchOr)]
         )
+
+
+def convert_term_to_type(field: str, term: str, target_type, possible_types):
+    """ Convert a string search term to a designated type.
+
+    Gives a standard interpretation of types like datetime and boolean.
+
+    Parameters
+    ----------
+    field: str
+        The name of the field.
+    term: str
+        The search term for the field.
+    target_type: Type
+        The field type.
+    possible_types: [Type]
+        Possible field types for a string/number/list search.
+
+    Returns
+    -------
+    Any
+        The search term converted to the target type.
+
+    Throws
+    ------
+    ValueError
+        If the target type is not in the possible types or,
+        the search term cannot be converted to the target type.
+    """
+    if target_type not in possible_types:
+        tstr = ",".join([str(t) for t in possible_types])
+        raise ValueError(f"Field {field} is not a {tstr}.")
+    elif target_type == str:
+        return term
+    elif target_type == bool:
+        return term.lower == "t"
+    elif target_type in (float, int):
+        try:
+            return float(term)
+        except ValueError:
+            raise ValueError(f"Field {field}: {term} cannot be converted into a number.")
+    elif target_type == datetime.datetime:
+        try:
+            # todo - allow different datetime formats?
+            return datetime.datetime.strptime(term, "%Y-%m-%d")
+        except ValueError:
+            raise ValueError(f"Field {field}: {term} cannot be converted into a date.")
+    elif target_type == list:
+        # todo - convert types in list?
+        return term.split(",")
+    return term

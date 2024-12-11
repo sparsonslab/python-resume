@@ -11,7 +11,7 @@ from functools import reduce
 import operator
 import re
 
-from resume.query.query import Query
+from resume.query.query import Query, convert_term_to_type
 
 
 class ObjectListQuery(Query):
@@ -118,61 +118,48 @@ class ObjectListQuery(Query):
         return reduce(lambda x, y: x | y, [oper.evaluate() for oper in operands])
 
     def search_string(self, term, field):
-        """ String search operation.
-
-        Can be used for both string and boolean fields.
-        """
         # Field and type check.
         k = self._match_field(field)
 
+        #  Convert search term to a string or bool.
+        qterm = convert_term_to_type(
+            field, term, target_type=k[2], possible_types=(str, bool)
+        )
+
         # String field
-        if k[2] == str:
+        if isinstance(qterm, str):
             # Use an re.Pattern object for matching. This is > twice as fast
             # as using fnmatch.fnmatch(entry, qterm).
-            qterm_pattern = re.compile(fnmatch.translate(str(term)))
+            qterm_pattern = re.compile(fnmatch.translate(qterm))
             return set([
                 idx for idx, entry in self.indexes[k].items()
                 if qterm_pattern.search(entry) is not None
             ])
 
         # Boolean field.
-        if k[2] == bool:
-            qterm = term.lower() == "t"
+        if isinstance(qterm, bool):
             return set([
                 idx for idx, entry in self.indexes[k].items()
                 if entry == qterm
             ])
 
-        raise ValueError(f"Field {field} is not a string or bool.")
-
     def search_number(self, comp, term, field):
         # Field and type check.
         k = self._match_field(field)
 
-        #  Convert search term to a number or datetime
-        if k[2] in (float, int):
-            try:
-                qterm = float(term)
-            except ValueError:
-                raise ValueError \
-                    (f"Field {field}: {term} cannot be converted into a number.")
-        elif k[2] == datetime.datetime:
-            try:
-                # todo - allow different datetime formats?
-                qterm = datetime.datetime.strptime(term, "%Y-%m-%d")
-            except ValueError:
-                raise ValueError \
-                    (f"Field {field}: {term} cannot be converted into a date.")
-        else:
-            raise ValueError \
-                (f"Field {field} is not a float or integer or datetime.")
+        #  Convert search term to a number or datetime.
+        qterm = convert_term_to_type(
+            field, term,
+            target_type=k[2],
+            possible_types=(float, int, datetime.datetime)
+        )
 
-        # Make comparison.
-        if comp not in self.comparator_map:
+        # Get comparator function.
+        comp_foo = self.comparator_map.get(comp, None)
+        if comp_foo is None:
             raise ValueError(
                 f"Field {field}: {comp} is not a valid comparator.")
 
-        comp_foo = self.comparator_map[comp]
         return set([
             idx for idx, entry in self.indexes[k].items()
             if comp_foo(entry, qterm)
