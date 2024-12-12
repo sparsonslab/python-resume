@@ -110,7 +110,7 @@ class TestObjectListQuery(unittest.TestCase):
             query = f"{search_term}[{field}]"
 
             # Then: An error is thrown saying that the field is not a [correct type]
-            msg = f"Field {field} is not a"
+            msg = f"Field {field} is not"
             with self.subTest(field), self.assertRaisesRegex(ValueError, msg):
                 self.querier.query(query)
 

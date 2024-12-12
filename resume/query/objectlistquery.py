@@ -5,13 +5,13 @@
 #  that the above copyright notice appear in all copies and that both that
 #  copyright notice and this permission notice appear in supporting
 #  documentation.
-import datetime
 import fnmatch
 from functools import reduce
 import operator
 import re
 
-from resume.query.query import Query, convert_term_to_type
+from resume.query.FieldSpecification import FieldSpecification
+from resume.query.query import Query
 
 
 class ObjectListQuery(Query):
@@ -26,9 +26,8 @@ class ObjectListQuery(Query):
 
     Attributes
     ----------
-    fields: {(str, str, type): Callable}
-        The name as for the parameter, but with the field names (full and
-        abbreviated) converted to lower case.
+    fields: FieldSpecification
+        The fields.
     data: {str: object}
         The database to be searched.
         <unique identifier> : object in database.
@@ -43,10 +42,7 @@ class ObjectListQuery(Query):
 
     def __init__(self, fields):
         super().__init__()
-        self.fields = {
-            (full.lower(), abbr.lower(), typ): foo
-            for (full, abbr, typ), foo in fields.items()
-        }
+        self.fields = FieldSpecification(fields)
         self.data = {}
         self.indexes = {k: {} for k in self.fields.keys()}
         self.universal_set = set()
@@ -78,32 +74,6 @@ class ObjectListQuery(Query):
         """ Query the objects. """
         return [self.data[idx] for idx in super().query(query)]
 
-    def _match_field(self, field):
-        """ Match a field in a search operand to a database field.
-
-        Parameters
-        ----------
-        field: str
-            The field part of a search expression. i.e. <search-term>[<field>].
-            Matching is against the full or abbreviated field names in
-            self.fields and is case insensitive.
-
-        Returns
-        -------
-        (str, str, type)
-            The matching field key in self.fields.
-
-        Throws
-        ------
-        ValueError
-            If a matching field is not found.
-        """
-        f = field.lower()
-        for k in self.fields.keys():
-            if f == k[0] or f == k[1]:
-                return k
-        raise ValueError(f"Field {field} not recognised.")
-
     # -------------------------------------------------------------------------
     # Operand evaluation methods.
     # -------------------------------------------------------------------------
@@ -119,12 +89,7 @@ class ObjectListQuery(Query):
 
     def search_string(self, term, field):
         # Field and type check.
-        k = self._match_field(field)
-
-        #  Convert search term to a string or bool.
-        qterm = convert_term_to_type(
-            field, term, target_type=k[2], possible_types=(str, bool)
-        )
+        k, op, qterm = self.fields.convert_string(field, term)
 
         # String field
         if isinstance(qterm, str):
@@ -144,15 +109,7 @@ class ObjectListQuery(Query):
             ])
 
     def search_number(self, comp, term, field):
-        # Field and type check.
-        k = self._match_field(field)
-
-        #  Convert search term to a number or datetime.
-        qterm = convert_term_to_type(
-            field, term,
-            target_type=k[2],
-            possible_types=(float, int, datetime.datetime)
-        )
+        k, op, qterm = self.fields.convert_numeric(field, term)
 
         # Get comparator function.
         comp_foo = self.comparator_map.get(comp, None)
@@ -166,4 +123,5 @@ class ObjectListQuery(Query):
         ])
 
     def search_list(self, comp, term, field):
+        k, op, qterm = self.fields.convert_list(field, term)
         return set()

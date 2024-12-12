@@ -5,9 +5,9 @@
 #  that the above copyright notice appear in all copies and that both that
 #  copyright notice and this permission notice appear in supporting
 #  documentation.
-import datetime
 
-from resume.query.query import Query, convert_term_to_type
+from resume.query.FieldSpecification import FieldSpecification
+from resume.query.query import Query
 
 
 class MongoQuery(Query):
@@ -22,25 +22,14 @@ class MongoQuery(Query):
 
     Attributes
     ----------
-    fields: {(str, str, type): str}
-        The name as for the parameter, but with the field names (full and
-        abbreviated) converted to lower case.
+    fields: FieldSpecification
+        The fields
     """
     comparator_map = {">": "$gt", "<": "$lt", "=": "$eq"}
 
     def __init__(self, fields):
         super().__init__()
-        self.fields = {
-            (full.lower(), abbr.lower(), typ): path
-            for (full, abbr, typ), path in fields.items()
-        }
-
-    def _match_field(self, field):
-        f = field.lower()
-        for k, v in self.fields.items():
-            if f == k[0] or f == k[1]:
-                return k, v
-        raise ValueError(f"Field {field} not recognised.")
+        self.fields = FieldSpecification(fields)
 
     # -------------------------------------------------------------------------
     # Database specific search actions.
@@ -56,53 +45,27 @@ class MongoQuery(Query):
         return {"$or": [oper.evaluate() for oper in operands]}
 
     def search_string(self, term, field):
-        # Field and type check.
-        k, v = self._match_field(field)
-
-        #  Convert search term to a string or bool
-        qterm = convert_term_to_type(
-            field, term,
-            target_type=k[2],
-            possible_types=(str, bool)
-        )
-
+        k, op, qterm = self.fields.convert_string(field, term)
         # String field
         if isinstance(qterm, str):
             if "*" in qterm:
-                return {v: {"$regex": qterm.replace("*", "")}}
-            return {v: qterm}
+                return {op: {"$regex": qterm.replace("*", "")}}
+            return {op: qterm}
 
         # Boolean field.
         if isinstance(qterm, bool):
-            return {v: qterm}
+            return {op: qterm}
 
     def search_number(self, comp, term, field):
-        # Field and type check.
-        k, v = self._match_field(field)
-
-        # Convert search term to a number or datetime.
-        qterm = convert_term_to_type(
-            field, term,
-            target_type=k[2],
-            possible_types=(float, int, datetime.datetime)
-        )
+        k, op, qterm = self.fields.convert_numeric(field, term)
 
         # Get comparator operator.
         comp_op = self.comparator_map.get(comp, None)
         if comp_op is None:
             raise ValueError(
                 f"Field {field}: {comp} is not a valid comparator.")
-        return {v: {comp_op: qterm}}
+        return {op: {comp_op: qterm}}
 
     def search_list(self, comp, term, field):
-        # Field and type check.
-        k, v = self._match_field(field)
-
-        # Convert search term to a list.
-        qterm = convert_term_to_type(
-            field, term,
-            target_type=k[2],
-            possible_types=[list]
-        )
-
-        return {v: {"$in": qterm}}
+        k, op, qterm = self.fields.convert_list(field, term)
+        return {op: {"$in": qterm}}
