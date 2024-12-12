@@ -41,7 +41,7 @@ abstracted from the details of any particular database type. It can be inherited
 database:
 - [`ObjectListQuery(Query)`](resume/query/objectlistquery.py) is used to query a list of objects of any type (class objects, dictionaries, etc.). 
 Fields are added simply, with a one-line specification. 
-- [`SQLQuery(Query)`](resume/query/sqlquery.py) is used to generate SQL queries.
+- [`SQLiteQuery(Query)`](resume/query/sqlitequery.py) is used to generate SQLite queries.
 - [`MongoQuery(Query)`](resume/query/mongoquery.py) is used to generate MongoDB queries for PyMongo.
   
 You can write your own subclass!
