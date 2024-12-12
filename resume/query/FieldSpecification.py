@@ -69,7 +69,7 @@ class FieldSpecification:
         if k[2] == str:
             return k, v, term
         elif k[2] == bool:
-            return k, v, term.lower == "t"
+            return k, v, term.lower() == "t"
         raise ValueError(f"Field {field} is not string.")
 
     def convert_numeric(self, field, term):
